@@ -35,7 +35,8 @@ def create_tx(n, addressFrom, addressTo, mixer_list, fee=None):
 
 	# Get inputs signed by each of the miners
 	for x in pre_tx.mixer_inputs:
-		sig_mixer = send_tx(pre_tx.tx, x, pre_tx.pruned_mixer_inputs)
+		sig_mixer, pubKey_mixer = send_tx(pre_tx.tx, x, pre_tx.pruned_mixer_inputs)
+		x.scriptSig = bcs.CScript([sig_mixer, pubKey_mixer])
 
 	# Sign inputs owned by sender's address
 	txin_scriptPubKey = bcs.CScript([bcs.OP_DUP, bcs.OP_HASH160, bc.Hash160(addressFrom.pubKey), bcs.OP_EQUALVERIFY, bcs.OP_CHECKSIG])
@@ -45,7 +46,6 @@ def create_tx(n, addressFrom, addressTo, mixer_list, fee=None):
 		pre_tx.inputs[i].scriptSig = bcs.CScript([sig, addressFrom.pubKey])
 		bcseval.VerifyScript(pre_tx.inputs[i].scriptSig, txin_scriptPubKey, pre_tx.tx, i, (bcseval.SCRIPT_VERIFY_P2SH,))
 
-	# Mixers need to sign their transactions
 	return pre_tx
 
 
@@ -55,7 +55,7 @@ def sign_inputs(tx, inputs, sig, pubKey):
 		inputs[i].scriptSig = bcs.CScript([sig, pubKey])
 
 
-# Function to send inputs to mixer and have them return the sig
+# Function to send inputs to mixer (encrypted) and have them return the sig (also encrypted)
 def send_tx(tx, inputs_users, inputs):
 	pass
 

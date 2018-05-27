@@ -35,6 +35,7 @@ class mixer(address):
 
 		self.fee = fee
 
+
 # Class for sender addresses (private key is specified)
 class sender(address):
 	def __init__(self, privKey):
